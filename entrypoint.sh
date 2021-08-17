@@ -28,46 +28,14 @@ echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
 
-current_branch=$(git rev-parse --abbrev-ref HEAD)
-
-pre_release="true"
-IFS=',' read -ra branch <<< "$release_branches"
-for b in "${branch[@]}"; do
-    echo "Is $b a match for ${current_branch}"
-    if [[ "${current_branch}" =~ $b ]]
-    then
-        pre_release="false"
-    fi
-done
-echo "pre_release = $pre_release"
-
 # fetch tags
 git fetch --tags
 
-# get latest tag that looks like a semver (with or without v)
-case "$tag_context" in
-    *repo*)
-        tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^v?[0-9]+$" | head -n1)
-        pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^v?[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
-        ;;
-    *branch*)
-        tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^v?[0-9]+$" | head -n1)
-        pre_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^v?[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
-        ;;
-    * ) echo "Unrecognised context"; exit 1;;
-esac
+tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^v?[0-9]+$" | head -n1)
 
 echo "========= the tag $tag"
 
-# if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
-if [ -z "$tag" ]
-then
-    log=$(git log --pretty='%B')
-    tag="$initial_version"
-    pre_tag="$initial_version"
-else
-    log=$(git log $tag..HEAD --pretty='%B')
-fi
+log=$(git log --pretty='%B')
 
 # get current commit hash for tag
 tag_commit=$(git rev-list -n 1 $tag)
@@ -87,57 +55,9 @@ then
   echo $log
 fi
 
-case "$log" in
-    *#major* ) new=$(semver -i major $tag); part="major";;
-    *#minor* ) new=$(semver -i minor $tag); part="minor";;
-    *#patch* ) new=$(semver -i patch $tag); part="patch";;
-    *#none* )
-        echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0;;
-    * )
-        if [ "$default_semvar_bump" == "none" ]; then
-            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0
-        else
-            new=$tag + 1
-            # TODO remove this, new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump
-        fi
-        ;;
-esac
+new=$tag + 1
+
 echo "========= new $new"
-
-if $pre_release
-then
-    # Already a prerelease available, bump it
-    if [[ "$pre_tag" == *"$new"* ]]; then
-        new=$(semver -i prerelease $pre_tag --preid $suffix); part="pre-$part"
-    else
-        new="$new-$suffix.1"; part="pre-$part"
-    fi
-fi
-
-echo $part
-echo "========= part $part"
-
-# did we get a new tag?
-if [ ! -z "$new" ]
-then
-	# prefix with 'v'
-	if $with_v
-	then
-		new="v$new"
-	fi
-fi
-
-if [ ! -z $custom_tag ]
-then
-    new="$custom_tag"
-fi
-
-if $pre_release
-then
-    echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
-else
-    echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
-fi
 
 # set outputs
 echo ::set-output name=new_tag::$new
