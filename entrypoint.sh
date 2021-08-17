@@ -57,6 +57,8 @@ case "$tag_context" in
     * ) echo "Unrecognised context"; exit 1;;
 esac
 
+echo "========= the tag $tag"
+
 # if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
 if [ -z "$tag" ]
 then
@@ -95,10 +97,12 @@ case "$log" in
         if [ "$default_semvar_bump" == "none" ]; then
             echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0
         else
-            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump
+            new=$tag + 1
+            # TODO remove this, new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump
         fi
         ;;
 esac
+echo "========= new $new"
 
 if $pre_release
 then
@@ -111,6 +115,7 @@ then
 fi
 
 echo $part
+echo "========= part $part"
 
 # did we get a new tag?
 if [ ! -z "$new" ]
