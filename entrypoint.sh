@@ -49,6 +49,7 @@ new="v$tag_without_v"
 if $dryrun
 then
     echo "dryrun new tag will be $new"
+    exit 0
 fi
 
 echo "new tag will be $new"
