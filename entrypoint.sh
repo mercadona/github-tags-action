@@ -3,37 +3,21 @@
 set -o pipefail
 
 # config
-default_semvar_bump=${DEFAULT_BUMP:-minor}
-with_v=${WITH_V:-false}
-release_branches=${RELEASE_BRANCHES:-master,main}
-custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
-initial_version=${INITIAL_VERSION:-0.0.0}
-tag_context=${TAG_CONTEXT:-repo}
-suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
 echo "*** CONFIGURATION ***"
-echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
-echo -e "\tWITH_V: ${with_v}"
-echo -e "\tRELEASE_BRANCHES: ${release_branches}"
-echo -e "\tCUSTOM_TAG: ${custom_tag}"
 echo -e "\tSOURCE: ${source}"
 echo -e "\tDRY_RUN: ${dryrun}"
-echo -e "\tINITIAL_VERSION: ${initial_version}"
-echo -e "\tTAG_CONTEXT: ${tag_context}"
-echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
 
 # fetch tags
 git fetch --tags
 
 tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^v?[0-9]+$" | head -n1)
-
-echo "========= the tag $tag"
 
 log=$(git log --pretty='%B')
 
@@ -61,20 +45,13 @@ tag_without_v="${tag:1}"
 
 new=$tag_without_v
 
-echo "========= new $new"
-
-# set outputs
-echo ::set-output name=new_tag::$new
-echo ::set-output name=part::$part
-
 # use dry run to determine the next tag
 if $dryrun
 then
-    echo ::set-output name=tag::$tag
-    exit 0
+    echo "dryrun new tag will be $new"
 fi
 
-echo ::set-output name=tag::$new
+echo "new tag will be $new"
 
 # create local git tag
 git tag $new
