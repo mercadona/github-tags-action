@@ -43,7 +43,7 @@ tag_without_v="${tag:1}"
 
 ((tag_without_v++))
 
-new=$tag_without_v
+new="v$tag_without_v"
 
 # use dry run to determine the next tag
 if $dryrun
