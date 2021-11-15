@@ -41,15 +41,15 @@ fi
 
 tag_without_v="${tag:1}"
 
-echo ">>>>>>>>>>> ${tag_without_v}"
+echo ">>>>>>>>>>> $tag_without_v"
 
 ((tag_without_v++))
 
-echo ">>>>>>>>>>> ${tag_without_v}"
+echo ">>>>>>>>>>> $tag_without_v"
 
 new="v$tag_without_v"
 
-echo ">>>>>>>>>>> ${new}"
+echo ">>>>>>>>>>> $new"
 
 # use dry run to determine the next tag
 if $dryrun
