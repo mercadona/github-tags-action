@@ -58,7 +58,7 @@ then
     exit 0
 fi
 
-echo "new tag will be $new"
+echo " >>>>>>>>>>>> new tag will be $new"
 
 # create local git tag
 git tag $new
