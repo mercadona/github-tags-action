@@ -1,8 +1,7 @@
 FROM alpine:3.10
-LABEL "repository"="https://https://github.com/mercadona/github-tags-action"
 
-COPY entrypoint.sh /entrypoint.sh
+COPY script.sh /script.sh
 
-RUN apk update && apk add bash git curl jq && apk add --update nodejs npm && npm install -g semver
+RUN apk update && apk add bash git curl jq
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["sh", "/script.sh"]

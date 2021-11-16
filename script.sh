@@ -2,17 +2,7 @@
 
 set -o pipefail
 
-# config
-source=${SOURCE:-.}
-dryrun=${DRY_RUN:-false}
-verbose=${VERBOSE:-true}
-
-cd ${GITHUB_WORKSPACE}/${source}
-
-echo "*** CONFIGURATION ***"
-echo -e "\tSOURCE: ${source}"
-echo -e "\tDRY_RUN: ${dryrun}"
-echo -e "\tVERBOSE: ${verbose}"
+cd ${GITHUB_WORKSPACE}/.
 
 # fetch tags
 git fetch --tags
@@ -33,32 +23,13 @@ if [ "$tag_commit" == "$commit" ]; then
     exit 0
 fi
 
-# echo log if verbose is wanted
-if $verbose
-then
-  echo $log
-fi
-
 tag_without_v="${tag:1}"
 
-echo ">>>>>>>>>>> $tag_without_v"
+incremented_tag="$(($tag_without_v + 1))"
 
-((tag_without_v++))
+new="v$incremented_tag"
 
-echo ">>>>>>>>>>> $tag_without_v"
-
-new="v$tag_without_v"
-
-echo ">>>>>>>>>>> $new"
-
-# use dry run to determine the next tag
-if $dryrun
-then
-    echo "dryrun new tag will be $new"
-    exit 0
-fi
-
-echo " >>>>>>>>>>>> new tag will be $new"
+echo "new tag will be $new"
 
 # create local git tag
 git tag $new
@@ -91,3 +62,18 @@ else
   echo "::error::Tag was not created properly."
   exit 1
 fi
+
+ git fetch --prune --prune-tags
+ tags_to_remove=$(git tag --sort=-creatordate | tail -n +31)
+ if [ -z "$tags_to_remove" ]
+ then
+   exit 0
+ fi
+
+ echo "this tags are going to be removed: $tags_to_remove"
+
+ for tag in $tags_to_remove
+ do
+   git tag --delete $tag
+   git push --no-verify --delete origin $tag
+ done
