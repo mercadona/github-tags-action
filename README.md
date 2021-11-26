@@ -1,6 +1,6 @@
 # github-tag-action
 
-A Github Action to automatically bump and tag master, on merge, with the latest formatted version.
+A Github Action to automatically bump and tag master, on merge, with the latest formatted version. In addition it also deletes the las tags as they are not needed.
 
 This is a copy of https://github.com/anothrNick/github-tag-action, modified to comply with our versioning format instead of using SemVer
 
@@ -32,8 +32,6 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 **Environment Variables**
 
 * **GITHUB_TOKEN** ***(required)*** - Required for permission to tag the repo.
-* **DRY_RUN** *(optional)* - Determine the next version without tagging the branch. The workflow can use the outputs `new_tag` and `tag` in subsequent steps. Possible values are ```true``` and ```false``` (default).
-* **VERBOSE** *(optional)* - Print git logs. For some projects these logs may be very large. Possible values are ```true``` (default) and ```false```.
 
 ### Workflow
 
@@ -44,3 +42,4 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
   * Get latest tag
   * Bump tag with major version in our format
   * Pushes tag to github
+  * Deletes old tags
