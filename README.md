@@ -1,6 +1,6 @@
 # github-tag-action
 
-A Github Action to automatically bump and tag master, on merge, with the latest formatted version. In addition it also deletes the las tags as they are not needed.
+A Github Action to automatically bump and tag master, on merge, with the latest formatted version. In addition it also deletes the oldest tags as they are not needed.
 
 This is a copy of https://github.com/anothrNick/github-tag-action, modified to comply with our versioning format instead of using SemVer
 
