@@ -63,6 +63,7 @@ else
   exit 1
 fi
 
+ git fetch --all --tags
  git fetch --prune --prune-tags
  tags_to_remove=$(git tag --sort=-creatordate | tail -n +31)
  if [ -z "$tags_to_remove" ]
