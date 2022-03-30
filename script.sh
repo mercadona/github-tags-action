@@ -56,25 +56,23 @@ EOF
 git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
 
 echo "::debug::${git_refs_response}"
-if [ "${git_ref_posted}" = "refs/tags/${new}" ]; then
-  exit 0
-else
+if [ "${git_ref_posted}" != "refs/tags/${new}" ]; then
   echo "::error::Tag was not created properly."
   exit 1
 fi
 
- git fetch --all --tags
- git fetch --prune --prune-tags
- tags_to_remove=$(git tag --sort=-creatordate | tail -n +31)
- if [ -z "$tags_to_remove" ]
- then
-   exit 0
- fi
+git fetch --all --tags
+git fetch --prune --prune-tags
+tags_to_remove=$(git tag --sort=-creatordate | tail -n +31)
+if [ -z "$tags_to_remove" ]
+then
+  exit 0
+fi
 
- echo "this tags are going to be removed: $tags_to_remove"
+echo "this tags are going to be removed: $tags_to_remove"
 
- for tag in $tags_to_remove
- do
-   git tag --delete $tag
-   git push --no-verify --delete origin $tag
- done
+for tag in $tags_to_remove
+do
+  git tag --delete $tag
+  git push --no-verify --delete origin $tag
+done
